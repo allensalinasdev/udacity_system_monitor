@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "iostream"
 #include "linux_parser.h"
 
 using std::stof;
@@ -66,33 +67,88 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+// DONE: Read and return the system memory utilization
+float LinuxParser::MemoryUtilization() {
+  // kMeminfoFilename
+  float memTotal, memFreee;//, memAvailable, buffers;
+  string line;
+  std::ifstream stream(kProcDirectory + kMeminfoFilename);
+  if (stream.is_open()) {
+    int lineCount = 0;
+    vector<float> values;
+    while (lineCount < 2)
+    {
+      std::getline(stream, line);
+      // std::cout << "AYSJ READ MEM: " << line << "\n";
+      //values.push_back(line);
+      std::istringstream linestream(line);
+      string title, value;
+      linestream >> title >> value;
+      values.push_back(std::stof(value));
+      lineCount++; 
+    }
+    memTotal =values[0];
+    memFreee = values[1]; 
+    float m =  memTotal - memFreee;
+//     MemTotal:        3982636 kB
+// MemFree:          361192 kB
+// MemAvailable:    1193020 kB
+// Buffers:           17220 kB
 
-// TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+
+    //return 1000;//m;
+    return m;
+  }
+//  return kernel;
+
+
+  return 0.0; 
+}
+
+// DONE: Read and return the system uptime
+long LinuxParser::UpTime() { 
+  long uptime;
+  string line;
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+      std::getline(stream, line);
+
+      std::istringstream linestream(line);
+      linestream >> uptime;
+
+      // std::cout << "AYSJ UPTIME OBTAINED: " << uptime << "\n";
+
+    return uptime;
+  }
+
+  return 0; 
+}
 
 // TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+long LinuxParser::Jiffies() { return 500; }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
+long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 500; }
 
 // TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { return 500; }
 
 // TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() { return 500; }
 
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 // TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+int LinuxParser::TotalProcesses() {
+  return std::stoi(LinuxParser::FindValueByKey(kProcDirectory + kStatFilename, "processes"));
+}
 
 // TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+int LinuxParser::RunningProcesses() { 
+  return std::stoi(LinuxParser::FindValueByKey(kProcDirectory + kStatFilename, "procs_running"));
+}
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
@@ -113,3 +169,25 @@ string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid[[maybe_unused]]) { return 0; }
+
+std::string LinuxParser::FindValueByKey(std::string filepath, std::string key){
+  string line;
+  string lineKey;
+  string value;
+  std::ifstream filestream(filepath);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      // std::cout << "AYSJ TotalProcesses KEY: "<< key << ", VALUE: " << value << "\n";
+      std::istringstream linestream(line);
+      while (linestream >> lineKey >> value) {
+        // std::cout << "AYSJ TotalProcesses KEY: "<< key << ", VALUE: " << value << "\n";
+        if (lineKey == key) {
+          // std::cout << "AYSJ key found:" << key << " Value: " << value << "\n";
+          return value;
+        }
+      }
+    }
+  }
+
+  return "0"; 
+}
