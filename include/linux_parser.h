@@ -27,6 +27,7 @@ int RunningProcesses();
 std::string OperatingSystem();
 std::string Kernel();
 std::string FindValueByKey(std::string filepath, std::string key);
+std::vector<std::string> GetJiffies();
 
 // CPU
 enum CPUStates {

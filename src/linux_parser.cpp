@@ -69,18 +69,18 @@ vector<int> LinuxParser::Pids() {
 
 // DONE: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
-  // kMeminfoFilename
   float memTotal, memFreee;//, memAvailable, buffers;
+
   string line;
+  
   std::ifstream stream(kProcDirectory + kMeminfoFilename);
+  
   if (stream.is_open()) {
     int lineCount = 0;
     vector<float> values;
     while (lineCount < 2)
     {
       std::getline(stream, line);
-      // std::cout << "AYSJ READ MEM: " << line << "\n";
-      //values.push_back(line);
       std::istringstream linestream(line);
       string title, value;
       linestream >> title >> value;
@@ -90,7 +90,7 @@ float LinuxParser::MemoryUtilization() {
     memTotal =values[0];
     memFreee = values[1]; 
     float m =  memTotal - memFreee;
-//     MemTotal:        3982636 kB
+// MemTotal:        3982636 kB
 // MemFree:          361192 kB
 // MemAvailable:    1193020 kB
 // Buffers:           17220 kB
@@ -125,7 +125,11 @@ long LinuxParser::UpTime() {
 }
 
 // TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 500; }
+long LinuxParser::Jiffies() { 
+  vector<string> result = GetJiffies();
+
+  return result.size(); 
+ }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
@@ -138,7 +142,11 @@ long LinuxParser::ActiveJiffies() { return 500; }
 long LinuxParser::IdleJiffies() { return 500; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() { 
+  vector<string> result = GetJiffies();
+
+  return result; 
+}
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
@@ -190,4 +198,23 @@ std::string LinuxParser::FindValueByKey(std::string filepath, std::string key){
   }
 
   return "0"; 
+}
+
+std::vector<string> LinuxParser::GetJiffies(){
+  vector<string> result;
+
+  long uptime;
+  string line;
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+      std::getline(stream, line);
+
+      std::istringstream ss(line);
+      string val;
+      while(getline(ss, val, ' ')) {
+        result.push_back(val);
+      }
+  }
+
+  return result;
 }
