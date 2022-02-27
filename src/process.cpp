@@ -14,7 +14,7 @@ using std::to_string;
 using std::vector;
 
 // TODO: Return this process's ID
-int Process::Pid() { return 0; }
+int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() {
@@ -29,18 +29,22 @@ float Process::CpuUtilization() {
 
     float seconds = sum / sysconf(_SC_CLK_TCK);
 
-    std::cout << "AYSJ CpuUtilization() seconds: " << seconds << "\n";
+    //std::cout << "AYSJ CpuUtilization() seconds: " << seconds << "\n";
     return seconds;
 }
 
 // TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+string Process::Command() { 
+    return LinuxParser::Command(pid_);
+}
 
 // TODO: Return this process's memory utilization
-string Process::Ram() { return string(); }
+string Process::Ram() { return LinuxParser::Ram(pid_); }
 
 // TODO: Return the user (name) that generated this process
-string Process::User() { return string(); }
+string Process::User() { 
+    return LinuxParser::Uid(pid_); 
+}
 
 // TODO: Return the age of this process (in seconds)
 long int Process::UpTime() { return 0; }
