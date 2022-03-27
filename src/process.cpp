@@ -18,19 +18,38 @@ int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
 float Process::CpuUtilization() {
-    vector<string> jiffies = LinuxParser::CpuUtilization();
+    // vector<string> jiffies = LinuxParser::CpuUtilization();
 
-    float sum = 0; //Time in jiffies
+    // float total = 0; //Time in jiffies
+    // float workers = 0;
 
-    for (string value: jiffies)
-    {
-        sum+=stof(value);
-    }
+    // for (int i = 0; i < jiffies.size();i++){
+    //     total+=stof(jiffies[i]);
+    //     if(i<3){
+    //         workers += stof(jiffies[i]);
+    //     }
+    // }
 
-    float seconds = sum / sysconf(_SC_CLK_TCK);
+    // // for (string value: jiffies)
+    // // {
+    // //     total+=stof(value);
+    // // }
 
-    //std::cout << "AYSJ CpuUtilization() seconds: " << seconds << "\n";
-    return seconds;
+    // //float work = stof(jiffies[0]) + stof(jiffies[1]) + stof(jiffies[2]);
+
+    // float percentage = workers/total*100;
+
+    // //std::cout<<"Workers: " << workers << ", total: " << total << "% << "<< percentage <<"\n"; 
+
+    // // float seconds = workers / total / sysconf(_SC_CLK_TCK);
+    // float seconds = workers / sysconf(_SC_CLK_TCK);
+
+    // // float seconds = total / sysconf(_SC_CLK_TCK);
+
+    // //std::cout << "AYSJ CpuUtilization() seconds: " << seconds << "\n";
+    // return seconds;
+
+    return 0;
 }
 
 // TODO: Return the command that generated this process
@@ -42,8 +61,10 @@ string Process::Command() {
 string Process::Ram() { return LinuxParser::Ram(pid_); }
 
 // TODO: Return the user (name) that generated this process
-string Process::User() { 
-    return LinuxParser::Uid(pid_); 
+string Process::User() {
+    string uid = LinuxParser::Uid(pid_);
+    std::string user = LinuxParser::User(uid); 
+    return user; 
 }
 
 // TODO: Return the age of this process (in seconds)

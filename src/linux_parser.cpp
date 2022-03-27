@@ -78,12 +78,13 @@ float LinuxParser::MemoryUtilization() {
   if (stream.is_open()) {
     int lineCount = 0;
     vector<float> values;
-    while (lineCount < 2)
+    while (lineCount < 10)
     {
       std::getline(stream, line);
       std::istringstream linestream(line);
       string title, value;
       linestream >> title >> value;
+      // std::cout << "Title: " << title << "Value: " << value << "\n";
       values.push_back(std::stof(value));
       lineCount++; 
     }
@@ -97,7 +98,16 @@ float LinuxParser::MemoryUtilization() {
 
 
     //return 1000;//m;
-    return m;
+    
+    //return m;
+
+    // Total - Disponible 
+    float memAvailable = values[2];
+    float cached = values[4];
+
+    // std::cout << "Cached: " << cached << " Avaliable: " <<  memAvailable << "\n";
+
+    return (cached + memAvailable) / (memTotal);
   }
 //  return kernel;
 
@@ -256,18 +266,43 @@ std::string LinuxParser::FindValueByKey(std::string filepath, std::string key){
 std::vector<string> LinuxParser::GetJiffies(){
   vector<string> result;
 
-  long uptime;
   string line;
-  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  std::ifstream stream(kProcDirectory + kStatFilename);
+
+  int counter = 1;
   if (stream.is_open()) {
       std::getline(stream, line);
 
       std::istringstream ss(line);
       string val;
+      //TODO: Check this out
       while(getline(ss, val, ' ')) {
-        result.push_back(val);
+        if (counter>2)
+          result.push_back(val);
+
+        counter ++;
       }
   }
 
   return result;
+}
+
+std::string LinuxParser::User(std:: string uid){
+  string line;
+  string name;
+  string x;
+  string key;
+  std::ifstream filestream(kPasswordPath);
+  if (filestream.is_open()) {
+    while (std::getline(filestream, line)) {
+      std::replace(line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> name >> x >> key) {
+        if(key == uid){
+          return name;
+        }
+      }
+    }
+  }
+  return name;
 }
