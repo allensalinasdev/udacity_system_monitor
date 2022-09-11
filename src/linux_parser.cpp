@@ -69,7 +69,7 @@ vector<int> LinuxParser::Pids() {
 
 // DONE: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
-  float memTotal, memFreee;//, memAvailable, buffers;
+  float memTotal, memFree, memAvailable, buffers;
 
   string line;
   
@@ -84,33 +84,16 @@ float LinuxParser::MemoryUtilization() {
       std::istringstream linestream(line);
       string title, value;
       linestream >> title >> value;
-      // std::cout << "Title: " << title << "Value: " << value << "\n";
       values.push_back(std::stof(value));
       lineCount++; 
     }
     memTotal =values[0];
-    memFreee = values[1]; 
-    float m =  memTotal - memFreee;
-// MemTotal:        3982636 kB
-// MemFree:          361192 kB
-// MemAvailable:    1193020 kB
-// Buffers:           17220 kB
+    memFree = values[1];
+    memAvailable = values[2];
+    float m =  (memTotal - memAvailable)/memTotal;
 
-
-    //return 1000;//m;
-    
-    //return m;
-
-    // Total - Disponible 
-    float memAvailable = values[2];
-    float cached = values[4];
-
-    // std::cout << "Cached: " << cached << " Avaliable: " <<  memAvailable << "\n";
-
-    return (cached + memAvailable) / (memTotal);
+    return m;
   }
-//  return kernel;
-
 
   return 0.0; 
 }
@@ -122,11 +105,13 @@ long LinuxParser::UpTime() {
   std::ifstream stream(kProcDirectory + kUptimeFilename);
   if (stream.is_open()) {
       std::getline(stream, line);
-
-      std::istringstream linestream(line);
+      // std::cout << "Uptime line: " << line;
+      std::string uptimePart = line.substr(0, line.find(" "));
+      
+      std::istringstream linestream(uptimePart);
       linestream >> uptime;
   }
-
+  
   return uptime;
 }
 
