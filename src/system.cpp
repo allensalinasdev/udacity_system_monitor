@@ -17,13 +17,17 @@ using std::string;
 using std::vector;
 
 // TODO: Return the system's CPU
-Processor& System::Cpu() {
+Processor &System::Cpu() {
   // Processor::Utilization();
   return cpu_;
 }
 
+bool SortFunction(Process &p1, Process &p2) { return p1 < p2; }
+
 // TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() {
+vector<Process> &System::Processes() {
+  processes_.clear();
+
   vector<int> pids = LinuxParser::Pids();
 
   for (int pid : pids) {
@@ -31,6 +35,9 @@ vector<Process>& System::Processes() {
 
     processes_.push_back(p);
   }
+
+  std::sort(processes_.begin(), processes_.end(),
+            [](Process &p1, Process &p2) { return p1 < p2; });
 
   return processes_;
 }
