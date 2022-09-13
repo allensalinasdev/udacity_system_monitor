@@ -13,7 +13,6 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-// DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
   string line;
   string key;
@@ -69,7 +68,6 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// DONE: Read and return the system memory utilization
 float LinuxParser::MemoryUtilization() {
   float memTotal, memFree, memAvailable, buffers;
 
@@ -80,6 +78,7 @@ float LinuxParser::MemoryUtilization() {
   if (stream.is_open()) {
     int lineCount = 0;
     vector<float> values;
+    
     while (lineCount < 10) {
       std::getline(stream, line);
       std::istringstream linestream(line);
@@ -88,6 +87,7 @@ float LinuxParser::MemoryUtilization() {
       values.push_back(std::stof(value));
       lineCount++;
     }
+
     memTotal = values[0];
     memFree = values[1];
     memAvailable = values[2];
@@ -101,21 +101,24 @@ float LinuxParser::MemoryUtilization() {
 
 long LinuxParser::UpTime() {
   long uptime;
+  
   string line;
+  
   std::ifstream stream(kProcDirectory + kUptimeFilename);
+  
   if (stream.is_open()) {
     std::getline(stream, line);
-    // std::cout << "Uptime line: " << line;
+    
     std::string uptimePart = line.substr(0, line.find(" "));
 
     std::istringstream linestream(uptimePart);
+    
     linestream >> uptime;
   }
 
   return uptime;
 }
 
-// TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() {
   vector<string> result = GetJiffies();
 
@@ -130,7 +133,7 @@ long LinuxParser::Jiffies() {
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 500; }
+long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
@@ -146,7 +149,6 @@ long LinuxParser::ActiveJiffies() {
   return sum;
 }
 
-// TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() {
   vector<string> result = GetJiffies();
 
@@ -166,19 +168,16 @@ vector<string> LinuxParser::CpuUtilization() {
   return result;
 }
 
-// TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
   return std::stoi(
       LinuxParser::FindValueByKey(kProcDirectory + kStatFilename, "processes"));
 }
 
-// TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
   return std::stoi(LinuxParser::FindValueByKey(kProcDirectory + kStatFilename,
                                                "procs_running"));
 }
 
-// TODO: Read and return the command associated with a process
 string LinuxParser::Command(int pid) {
   string filepath = kProcDirectory + to_string(pid) + kCmdlineFilename;
 
@@ -193,7 +192,6 @@ string LinuxParser::Command(int pid) {
   return line;
 }
 
-// TODO: Read and return the memory used by a process
 string LinuxParser::Ram(int pid) {
   string vmSize = FindValueByKey(
       kProcDirectory + to_string(pid) + kStatusFilename, "VmSize:");
@@ -210,7 +208,6 @@ string LinuxParser::Ram(int pid) {
   return "";
 }
 
-// TODO: Read and return the user ID associated with a process
 string LinuxParser::Uid(int pid) {
   string filepath = kProcDirectory + to_string(pid) + kStatusFilename;
   return LinuxParser::FindValueByKey(filepath, "Uid");
@@ -233,17 +230,14 @@ std::string LinuxParser::FindValueByKey(std::string filepath, std::string key) {
   string lineKey;
   string value = "";
   std::ifstream filestream(filepath);
+
   if (filestream.is_open()) {
+
     while (std::getline(filestream, line)) {
-      // std::cout << "AYSJ TotalProcesses KEY: "<< key << ", VALUE: " << value
-      // << "\n";
       std::istringstream linestream(line);
+
       while (linestream >> lineKey >> value) {
-        // std::cout << "AYSJ TotalProcesses KEY: "<< key << ", VALUE: " <<
-        // value << "\n";
         if (lineKey == key) {
-          // std::cout << "AYSJ key found:" << key << " Value: " << value <<
-          // "\n";
           return value;
         }
       }
@@ -265,7 +259,7 @@ std::vector<string> LinuxParser::GetJiffies() {
 
     std::istringstream ss(line);
     string val;
-    // TODO: Check this out
+
     while (getline(ss, val, ' ')) {
       if (counter > 2) result.push_back(val);
 
@@ -284,15 +278,25 @@ std::string LinuxParser::User(std::string uid) {
   std::ifstream filestream(kPasswordPath);
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
-      std::replace(line.begin(), line.end(), ':', ' ');
-      std::istringstream linestream(line);
-      while (linestream >> name >> x >> key) {
+      std::stringstream sstream(line);
+      std::string tmpValue;
+      int value = 0;
+      while (std::getline(sstream, tmpValue, ':')) {
+        if (value == 0) {
+          name = tmpValue;
+        } else if (value == 1) {
+          x = tmpValue;
+        } else if (value == 2) {
+          key = tmpValue;
+        }
         if (key == uid) {
           return name;
         }
+        value++;
       }
     }
   }
+
   return name;
 }
 
