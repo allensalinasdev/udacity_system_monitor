@@ -52,6 +52,9 @@ string Process::User() {
   return user_;
 }
 
-long int Process::UpTime() { return LinuxParser::UpTime(pid_); }
+long int Process::UpTime() {
+  int systemUpTime = LinuxParser::UpTime();
+  return systemUpTime - LinuxParser::UpTime(pid_); 
+}
 
 bool Process::operator<(Process &a) { return pid_ > a.pid_; }

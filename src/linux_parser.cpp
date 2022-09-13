@@ -25,7 +25,7 @@ string LinuxParser::OperatingSystem() {
       std::replace(line.begin(), line.end(), '"', ' ');
       std::istringstream linestream(line);
       while (linestream >> key >> value) {
-        if (key == "PRETTY_NAME") {
+        if (key == filterPrettyName) {
           filestream.close();
           std::replace(value.begin(), value.end(), '_', ' ');
           return value;
@@ -172,13 +172,13 @@ vector<string> LinuxParser::CpuUtilization() {
 // Reads and returns the number of processes for the system
 int LinuxParser::TotalProcesses() {
   return std::stoi(
-      LinuxParser::FindValueByKey(kProcDirectory + kStatFilename, "processes"));
+      LinuxParser::FindValueByKey(kProcDirectory + kStatFilename, filterProcesses));
 }
 
 // Reads and returns the number of running processes for the system
 int LinuxParser::RunningProcesses() {
   return std::stoi(LinuxParser::FindValueByKey(kProcDirectory + kStatFilename,
-                                               "procs_running"));
+                                               filterRunningProcesses));
 }
 
 // Reads and returns the command that executed the specified process
@@ -199,7 +199,7 @@ string LinuxParser::Command(int pid) {
 // Reads and returns the used RAM for the specified process
 string LinuxParser::Ram(int pid) {
   string vmSize = FindValueByKey(
-      kProcDirectory + to_string(pid) + kStatusFilename, "VmSize:");
+      kProcDirectory + to_string(pid) + kStatusFilename, filterProcMem);
 
   if (vmSize != "") {
     int memory = std::stof(vmSize);
@@ -216,7 +216,7 @@ string LinuxParser::Ram(int pid) {
 // Reads and returns the User ID for the specified process
 string LinuxParser::Uid(int pid) {
   string filepath = kProcDirectory + to_string(pid) + kStatusFilename;
-  return LinuxParser::FindValueByKey(filepath, "Uid:");
+  return LinuxParser::FindValueByKey(filepath, filterUID);
 }
 
 // Reads and returns the Uptime for the specified process
