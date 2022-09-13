@@ -14,43 +14,31 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-// TODO: Return this process's ID
 int Process::Pid() { return pid_; }
 
-// TODO: Return this process's CPU utilization
+//Based on: https://www.baeldung.com/linux/total-process-cpu-usage
 float Process::CpuUtilization() {
-  long uptime = LinuxParser::UpTime();
+  long system_uptime = LinuxParser::UpTime();
 
   vector<string> values = LinuxParser::ReadStatFile(pid_);
 
-  long utime = stol(values[13]);
+  float utime = stof(values[13]);
+  float stime = stof(values[14]);
+  float starttime = stof(values[21]);
 
-  long stime = stol(values[14]);
-  long cutime = stol(values[15]);
-  long cstime = stol(values[16]);
-  long starttime = stol(values[21]);
+  float clock_ticks = sysconf(_SC_CLK_TCK);
 
-  long total_time = utime + stime;
+  float utime_sec = utime / clock_ticks;
+  float stime_sec = stime / clock_ticks;
+  float starttime_sec = starttime / clock_ticks;
 
-  if (total_time > 0) {
-    //   total_time = total_time + cutime + cstime;
+  float process_elapsed_sec = system_uptime - starttime_sec;
+  float process_usage_sec = utime_sec + stime_sec;
+  float process_usage = process_usage_sec / process_elapsed_sec;
 
-    long hertz = sysconf(_SC_CLK_TCK);
-        // std::cout << "CONTENIDO para pid " << to_string(pid_) << ":"
-        //     << to_string(values.size()) << " " << values[13] << "\n";
-    float seconds = uptime - (starttime / hertz);
-
-        // std::cout << "Uptime: " << to_string(uptime) <<  "starttime: " << to_string(starttime) <<" HERTZ: " << to_string(hertz) <<" Seconds: "<< to_string(seconds) << "\n";
-
-    long cpu_usage = (total_time / hertz) / seconds;
-
-    return cpu_usage;
-  }
-
-  return 0;
+  return process_usage;
 }
 
-// TODO: Return the command that generated this process
 string Process::Command() { return LinuxParser::Command(pid_); }
 
 string Process::Ram() { return LinuxParser::Ram(pid_); }
@@ -63,7 +51,4 @@ string Process::User() {
 
 long int Process::UpTime() { return LinuxParser::UpTime(pid_); }
 
-bool Process::operator<(Process &a) { 
-    // return pid_ > a.pid_; 
-        return CpuUtilization() > a.CpuUtilization(); 
-    }
+bool Process::operator<(Process &a) { return pid_ > a.pid_; }
