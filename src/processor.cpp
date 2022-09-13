@@ -12,7 +12,7 @@ float Processor::Utilization() {
   float total = 0;  // Time in jiffies
   float workers = 0;
 
-  for (int i = 0; i < jiffies.size(); i++) {
+  for (size_t i = 0; i < jiffies.size(); i++) {
     total += stof(jiffies[i]);
     if (i < 3) {
       workers += stof(jiffies[i]);

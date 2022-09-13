@@ -6,9 +6,9 @@ using std::string;
 using std::to_string;
 
 string Format::ElapsedTime(long seconds) {
-  int hours = (seconds / 60) / 60;
+  int hours = seconds / 3600;
 
-  int minutes = (seconds / 60);
+  int minutes = seconds / 60;
 
   int finalSeconds = seconds % 60;
 

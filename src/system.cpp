@@ -11,29 +11,23 @@
 #include "process.h"
 #include "processor.h"
 
-using std::set;
-using std::size_t;
-using std::string;
-using std::vector;
+using namespace std;
 
-// TODO: Return the system's CPU
+// Returns the system's CPU
 Processor &System::Cpu() {
-  // Processor::Utilization();
   return cpu_;
 }
 
 bool SortFunction(Process &p1, Process &p2) { return p1 < p2; }
 
-// TODO: Return a container composed of the system's processes
+// Returns a container composed of the system's processes
 vector<Process> &System::Processes() {
   processes_.clear();
 
   vector<int> pids = LinuxParser::Pids();
 
   for (int pid : pids) {
-    Process p{pid = pid};
-
-    processes_.push_back(p);
+    processes_.emplace_back(pid);
   }
 
   std::sort(processes_.begin(), processes_.end(),

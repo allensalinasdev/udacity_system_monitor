@@ -1,11 +1,13 @@
+#include "ncurses_display.h"
+
 #include <curses.h>
+
 #include <chrono>
 #include <string>
 #include <thread>
 #include <vector>
 
 #include "format.h"
-#include "ncurses_display.h"
 #include "system.h"
 
 using std::string;
@@ -72,14 +74,29 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   int const num_processes = int(processes.size()) > n ? n : processes.size();
   for (int i = 0; i < num_processes; ++i) {
     mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
-    mvwprintw(window, row, user_column, processes[i].User().c_str());
+    mvwprintw(window, row, user_column,
+              CompleteString(processes[i].User(), 6).c_str());
     float cpu = processes[i].CpuUtilization() * 100;
     mvwprintw(window, row, cpu_column, to_string(cpu).substr(0, 4).c_str());
-    mvwprintw(window, row, ram_column, processes[i].Ram().c_str());
+    mvwprintw(window, row, ram_column,
+              CompleteString(processes[i].Ram(), 8).c_str());
     mvwprintw(window, row, time_column,
               Format::ElapsedTime(processes[i].UpTime()).c_str());
     mvwprintw(window, row, command_column,
-              processes[i].Command().substr(0, window->_maxx - 46).c_str());
+              (processes[i].Command() == string()
+                   ? ""
+                   : CompleteString(processes[i].Command(), 40) + "...")
+                  .c_str());
+  }
+}
+
+std::string NCursesDisplay::CompleteString(std::string stringToComplete,
+                                           size_t requiredSize) {
+  if (stringToComplete.length() > requiredSize) {
+    return stringToComplete.substr(0, requiredSize - 1);
+  } else {
+    return stringToComplete.append(requiredSize - stringToComplete.length(),
+                                   ' ');
   }
 }
 

@@ -16,7 +16,7 @@ using std::vector;
 
 int Process::Pid() { return pid_; }
 
-//Based on: https://www.baeldung.com/linux/total-process-cpu-usage
+// Based on: https://www.baeldung.com/linux/total-process-cpu-usage
 float Process::CpuUtilization() {
   long system_uptime = LinuxParser::UpTime();
 
@@ -44,11 +44,17 @@ string Process::Command() { return LinuxParser::Command(pid_); }
 string Process::Ram() { return LinuxParser::Ram(pid_); }
 
 string Process::User() {
-  string uid = LinuxParser::Uid(pid_);
-  std::string user = LinuxParser::User(uid);
-  return user;
+  if (user_ == string()) { //Used to 'Cache' username
+    string uid = LinuxParser::Uid(pid_);
+    user_ = LinuxParser::User(uid);
+  }
+
+  return user_;
 }
 
-long int Process::UpTime() { return LinuxParser::UpTime(pid_); }
+long int Process::UpTime() {
+  int systemUpTime = LinuxParser::UpTime();
+  return systemUpTime - LinuxParser::UpTime(pid_); 
+}
 
 bool Process::operator<(Process &a) { return pid_ > a.pid_; }
